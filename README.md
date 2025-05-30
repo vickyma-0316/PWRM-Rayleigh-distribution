@@ -1,1 +1,1 @@
-# PWRM-Rayleigh-dist-n
+# PWRM-Rayleigh-distribution
