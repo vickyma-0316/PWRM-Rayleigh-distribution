@@ -311,9 +311,9 @@ RM.breakdown.point <- function(x, power) {
 
 
 # --------------------------------------------------------------
-# code2 for figures 5-8: G.V. from LOOCV
+# code2 for figures 6-7: G.V. from LOOCV
 # --------------------------------------------------------------
-# Figs 5(a), 6(a), 7(a) and 8(a)
+# Figs 6(a), 6(c), 7(a) and 7(c)
 
 sample <- c(6.96,9.30,6.96,7.24,9.30,4.9,8.42,6.05,10.18,6.82,8.58,7.77,11.94,11.25,12.94,12.94)
 lambda=0.038
@@ -361,9 +361,9 @@ plot(x=seq(0,5,by=0.1), y6, type="l", xlab="p",ylab="Generalized variance", main
 
 
 # --------------------------------------------------------------
-# code3 for figures 5-8: Lower and upper breakdown pts
+# code3 for figures 6-7: Lower and upper breakdown pts
 # --------------------------------------------------------------
-# Figs 5(b), 6(b), 7(b) and 8(b)
+# Figs 6(b), 6(d), 7(b) and 7(d)
 
 ##p=0(0.1)5: calculate lower and upper breakdown point
 Lower.Upper.bound <- function(sample, a=0, b=5, deltax=0.1) {
@@ -497,6 +497,52 @@ x1 <- c(6.96,9.30,6.96,7.24,9.30,4.9,8.42,6.05,10.18,6.82,8.58,7.77,11.94,11.25,
 n1 <- length(x1)
 x2 <- rray.twopar(n1,0.03792208,4.29057239)
 ks.test(x1,x2)
+
+# -------------------------------------------
+# qqplot for real-data 
+# -------------------------------------------
+x1 <- c(6.96, 9.30, 6.96, 7.24, 9.30, 4.9, 8.42, 6.05,
+        10.18, 6.82, 8.58, 7.77, 11.94, 11.25, 12.94, 12.94)
+
+rayleigh_pdf <- function(x, mu, lambda) {
+  y <- ifelse(x >= mu, 2 * lambda * (x - mu) * exp(-lambda * (x - mu)^2), 0)
+  y[y <= 0] <- 1e-10  # avoid log(0)
+  return(y)
+}
+
+rayleigh_cdf <- function(q, mu, lambda) {
+  ifelse(q >= mu, 1 - exp(-lambda * (q - mu)^2), 0)
+}
+
+rayleigh_qf <- function(p, mu, lambda) {
+  mu + sqrt(-log(1 - p) / lambda)
+}
+
+negloglik_rayleigh <- function(params) {
+  mu <- params[1]
+  lambda <- params[2]
+  if (lambda <= 0) return(Inf)
+  -sum(log(rayleigh_pdf(x1, mu, lambda)))
+}
+
+
+fit <- optim(par = c(mu = (min(x1) - 0.01), lambda = 0.1),
+             fn = negloglik_rayleigh,
+             method = "L-BFGS-B",
+             lower = c(mu = -Inf, lambda = 1e-6))
+
+mu_hat <- fit$par["mu"]
+lambda_hat <- fit$par["lambda"]
+
+# QQ plot
+par(mar = c(5, 6, 4, 2)) 
+qqplot(rayleigh_qf(ppoints(length(x1)), mu_hat, lambda_hat),
+       sort(x1), cex.lab = 1.5, cex.axis = 1.8,
+       main = "",
+       xlab = "Theoretical Quantiles", ylab = "Sample Quantiles", pch = 19)
+abline(0, 1, col = "red", lty = 2, lwd = 3)
+
+
 
 
 
