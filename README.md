@@ -5,3 +5,4 @@ This R code contains the main functions for data analysis and plotting for the r
 ## Files
 
 - `Rcode.R` – Contains key functions used in the analysis
+- `figs.R`  – Contains plots R code
